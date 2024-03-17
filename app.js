@@ -4,7 +4,7 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const cors = require('cors'); // Import cors middleware
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3006;
 
 // Middleware
 app.use(cors()); // Enable CORS for all routes
