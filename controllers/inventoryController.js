@@ -1,69 +1,66 @@
-const db = require('../config/db');
-
-// Controller for handling inventory related operations
+const Inventory = require('../models/inventoryModel'); // Import mongoose model
 
 // Get all inventory items
 exports.getAllInventory = (req, res) => {
-    db.query('SELECT * FROM inventory', (err, result) => {
-        if (err) {
-            res.status(500).json({ error: 'Error retrieving inventory' });
-        } else {
-            res.status(200).json(result);
-        }
-    });
-};
+    Inventory.find({})
+      .then(inventory => {
+        res.status(200).json(inventory);
+      })
+      .catch(err => {
+        console.error('Error retrieving inventory:', err);
+        res.status(500).json({ error: 'Error retrieving inventory' });
+      });
+  };
 
-
-
-
-
-// Add new inventory item
 // Add new inventory item
 exports.addInventoryItem = (req, res) => {
     const { name, description, quantity, price } = req.body;
     const total_price = quantity * price; // Calculate total price
-    const newItem = { name, description, quantity, price,  total_price };
-    db.query('INSERT INTO inventory SET ?', newItem, (err) => {
-        if (err) {
-            res.status(500).json({ error: 'Error adding inventory item' });
-        } else {
-            res.status(201).json({ message: 'Inventory item added successfully' });
-        }
+    const newItem = new Inventory({ 
+        name, 
+        description, 
+        quantity, 
+        price,
+        total_price,  
+        date: Date.now() // Add the current date and time
     });
-};
-
-
-
-
+    newItem.save()
+      .then(() => {
+        res.status(201).json({ message: 'Inventory item added successfully' });
+      })
+      .catch(err => {
+        console.error('Error adding inventory item:', err);
+        res.status(500).json({ error: 'Error adding inventory item' });
+      });
+  };
 
 // Update inventory item
 exports.updateInventoryItem = (req, res) => {
-    const { id } = req.params;
-    const { name, description, quantity, price } = req.body;
-    const total_price = quantity * price; // Recalculate total price
-    const updatedItem = { name, description, quantity, price, total_price };
-    db.query('UPDATE inventory SET ? WHERE id = ?', [updatedItem, id], (err) => {
-        if (err) {
-            res.status(500).json({ error: 'Error updating inventory item' });
-        } else {
-            res.status(200).json({ message: 'Inventory item updated successfully' });
-        }
-    });
+  const { id } = req.params;
+  const { name, description, quantity, price } = req.body;
+  const total_price = quantity * price; // Recalculate total price
+  Inventory.findByIdAndUpdate(id, { name, description, quantity, price, total_price }, (err) => {
+    if (err) {
+      res.status(500).json({ error: 'Error updating inventory item' });
+    } else {
+      res.status(200).json({ message: 'Inventory item updated successfully' });
+    }
+  });
 };
-
-
-
-
-
 
 // Delete inventory item
 exports.deleteInventoryItem = (req, res) => {
     const { id } = req.params;
-    db.query('DELETE FROM inventory WHERE id = ?', id, (err) => {
-        if (err) {
-            res.status(500).json({ error: 'Error deleting inventory item' });
+    Inventory.findByIdAndDelete(id)
+      .then(deletedItem => {
+        if (!deletedItem) {
+          res.status(404).json({ error: 'Inventory item not found' });
         } else {
-            res.status(200).json({ message: 'Inventory item deleted successfully' });
+          res.status(200).json({ message: 'Inventory item deleted successfully' });
         }
-    });
-};
+      })
+      .catch(err => {
+        console.error('Error deleting inventory item:', err);
+        res.status(500).json({ error: 'Error deleting inventory item' });
+      });
+  };
