@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to MongoDB using mongoose
 mongoose.connect('mongodb+srv://ikenna:Tekere1983@cluster0.f63sfas.mongodb.net/e-commerce?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+ // useNewUrlParser: true,
+ // useUnifiedTopology: true,
 });
 
 // Check connection
